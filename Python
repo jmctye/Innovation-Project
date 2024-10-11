@@ -1,1 +1,39 @@
+import pandas as pd
+import plotly.express as px
 
+data = {
+    'Technique': ['Phishing', 'Spearphishing', 'Brute Force', 'SQL Injection', 'Malware', 'PowerShell', 'Credential Dumping'],
+    'Tactic': ['Initial Access', 'Initial Access', 'Credential Access', 'Execution', 'Persistence', 'Execution', 'Credential Access'],
+    'Mitigation': ['User training', 'User training', 'Account lockout policies', 'Input validation', 'Anti-malware software', 'Script blocking', 'Monitor logs'],
+    'Category': ['Social Engineering', 'Social Engineering', 'Password Cracking', 'Injection', 'Malware', 'Scripting', 'Password Cracking']
+}
+
+# Create a DataFrame
+df = pd.DataFrame(data)
+
+# Circular Dendrogram (Sunburst chart with filters)
+fig = px.sunburst(df, path=['Tactic', 'Category', 'Technique'], values=None, 
+                  title='MITRE ATT&CK Circular Dendrogram')
+
+# Add interactivity for filtering techniques and top tactics
+# Question 1: Most common techniques
+technique_counts = df['Category'].value_counts().reset_index()
+technique_counts.columns = ['Category', 'Count']
+
+# Question 2: Top 3 Tactics
+top_tactics = df['Tactic'].value_counts().nlargest(3).reset_index()
+top_tactics.columns = ['Tactic', 'Count']
+
+# Display the dendrogram
+fig.show()
+
+# Displaying answers to the questions
+print("Most common technique categories:")
+print(technique_counts)
+
+print("\nTop 3 tactics used:")
+print(top_tactics)
+
+print("\nSuggestions for preventing techniques:")
+for technique, mitigation in df.groupby('Technique')['Mitigation'].first().items():
+    print(f"{technique}: {mitigation}")
