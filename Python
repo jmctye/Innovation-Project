@@ -2,50 +2,63 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-# Sample Data: Structure of MITRE ATT&CK (Replace with actual dataset)
+# Sample Data: Structure of MITRE ATT&CK 
 data = {
-    'Technique': ['Phishing', 'Spearphishing', 'Brute Force', 'SQL Injection', 'Malware', 'PowerShell', 'Credential Dumping'],
-    'Tactic': ['Initial Access', 'Initial Access', 'Credential Access', 'Execution', 'Persistence', 'Execution', 'Credential Access'],
-    'Mitigation': ['User training', 'User training', 'Account lockout policies', 'Input validation', 'Anti-malware software', 'Script blocking', 'Monitor logs'],
-    'Category': ['Social Engineering', 'Social Engineering', 'Password Cracking', 'Injection', 'Malware', 'Scripting', 'Password Cracking']
+    'Technique': [
+        'Phishing', 'Spearphishing', 'Brute Force', 'SQL Injection', 'Malware', 
+        'PowerShell', 'Credential Dumping', 'Man-in-the-Middle', 'DDoS', 'Drive-by Compromise'
+    ],
+    'Tactic': [
+        'Initial Access', 'Initial Access', 'Credential Access', 'Execution', 'Persistence', 
+        'Execution', 'Credential Access', 'Credential Access', 'Impact', 'Initial Access'
+    ],
+    'Mitigation': [
+        'User training', 'User training', 'Account lockout policies', 'Input validation', 'Anti-malware software', 
+        'Script blocking', 'Monitor logs', 'Encryption and VPN', 'Network filtering', 'Browser security'
+    ],
+    'Category': [
+        'Social Engineering', 'Social Engineering', 'Password Cracking', 'Injection', 'Malware', 
+        'Scripting', 'Password Cracking', 'Network Attack', 'Network Attack', 'Exploitation'
+    ]
 }
 
 # Create a DataFrame
 df = pd.DataFrame(data)
 
-# Circular Dendrogram (Sunburst chart with filters)
+# Circular Dendrogram (Sunburst chart)
 fig = px.sunburst(df, path=['Tactic', 'Category', 'Technique'], values=None, 
                   title='MITRE ATT&CK Circular Dendrogram')
 
-# Question 1: Most common techniques (formatted vertically)
-technique_counts = df['Category'].value_counts().reset_index()
-technique_counts.columns = ['Category', 'Count']
-technique_str = "<br>".join([f"{row['Category']}: {row['Count']}" for _, row in technique_counts.iterrows()])
+# Question 1: Most common techniques 
+technique_counts = df['Category'].value_counts()
+technique_counts_filtered = technique_counts[technique_counts >= 2].reset_index()
+technique_counts_filtered.columns = ['Category', 'Count']
+technique_str = "<br>".join([f"{row['Category']}: {row['Count']}" for _, row in technique_counts_filtered.iterrows()])
 
-# Question 2: Top 3 Tactics (formatted vertically)
+# Question 2: Top 3 Tactics 
 top_tactics = df['Tactic'].value_counts().nlargest(3).reset_index()
 top_tactics.columns = ['Tactic', 'Count']
 tactics_str = "<br>".join([f"{row['Tactic']}: {row['Count']}" for _, row in top_tactics.iterrows()])
 
-# Question 3: Mitigation Suggestions (formatted vertically)
+# Question 3: Mitigation Suggestions 
 mitigations_list = [f"{technique}: {mitigation}" for technique, mitigation in df.groupby('Technique')['Mitigation'].first().items()]
 mitigations_str = "<br>".join(mitigations_list)
 
-# Create annotations to display text next to the figure with proper wrapping and vertical alignment
+# Create annotations to display text next to the figure 
 annotations = [
     go.layout.Annotation(
-        x=1.05,  # Move it to the right
-        y=0.85,
+        x=1.10,  
+        y=0.80,
         xref="paper",
         yref="paper",
         showarrow=False,
         text=f"<b>Most Common Techniques:</b><br>{technique_str}",
         align="left",
         font=dict(size=12),
-        width=250,  # Set a fixed width to allow wrapping
+        width=250,  
     ),
     go.layout.Annotation(
-        x=1.05,  # Align all at same x
+        x=1.10,  
         y=0.55,
         xref="paper",
         yref="paper",
@@ -53,26 +66,26 @@ annotations = [
         text=f"<b>Top 3 Tactics:</b><br>{tactics_str}",
         align="left",
         font=dict(size=12),
-        width=250,  # Set a fixed width to allow wrapping
+        width=250, 
     ),
     go.layout.Annotation(
-        x=1.05,
-        y=0.25,
+        x=1.10,
+        y=0.15,
         xref="paper",
         yref="paper",
         showarrow=False,
-        text=f"<b>Mitigation Suggestions:</b><br>{mitigations_str}",  # Suggestions in vertical row
+        text=f"<b>Mitigation Suggestions:</b><br>{mitigations_str}",  
         align="left",
         font=dict(size=12),
-        width=250,  # Set a fixed width to allow wrapping
+        width=250,  
     )
 ]
 
-# Update figure layout to add annotations
+# Updates figure layout to add annotations
 fig.update_layout(
     annotations=annotations,
-    margin=dict(l=0, r=400, t=50, b=0),  # Adjust right margin for space
+    margin=dict(l=0, r=400, t=40, b=0),  
 )
 
-# Show the figure
 fig.show()
+
